@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import { ObjectId } from 'mongodb';
+import { getDTOFromEntity } from '../libs/zod-extenstion';
+
 
 export const userEntitySchema = z.object({
   _id: z.instanceof(ObjectId),
@@ -11,12 +13,7 @@ export type UserEntity = z.infer<typeof userEntitySchema>;
 
 // DTO
 
-export const userDTOSchema = z.object({
-  id: z.string(),
-  name: userEntitySchema.shape.name,
-  email: userEntitySchema.shape.email,
-});
-
+const userDTOSchema = getDTOFromEntity(userEntitySchema);
 export type UserDTO = z.infer<typeof userDTOSchema>;
 
 //   Util func

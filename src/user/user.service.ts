@@ -9,7 +9,7 @@ export class UserService {
   }
 
   private getUsersCollection() {
-    return this.db.collection<UserEntity>('users');
+    return this.db.collection<UserEntity>('users')
   }
 
   async findUser(id: string): Promise<UserDTO | null> {
