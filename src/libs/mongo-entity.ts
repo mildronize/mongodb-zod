@@ -8,14 +8,16 @@ export interface MongoEntityProp<TSchema extends Record<string, unknown>> {
   readonly schema?: AcceptedParser<TSchema> | undefined;
 }
 
-export class MongoEntity<TSchema extends Record<string, unknown>> {
-  public readonly collection: Collection<TSchema>;
-  constructor(protected db: Db, public prop: MongoEntityProp<TSchema>) {
-    this.collection = this.db.collection<TSchema>(prop.collectionName);
-  }
+export class MongoEntity<TSchema extends Record<string, unknown> = {}> {
+  // public readonly collection: Collection<TSchema>;
+  constructor(public prop: MongoEntityProp<TSchema>) {}
 
   public parse(data: unknown): TSchema {
     return parseSchema(this.prop.schema ?? ({} as AcceptedParser<TSchema>), data);
+  }
+
+  public getCollection(db: Db) {
+    return db.collection<TSchema>(this.prop.collectionName);
   }
 }
 
@@ -26,7 +28,7 @@ export class MongoEntity<TSchema extends Record<string, unknown>> {
 function testMongoEntity() {
   const mongoClient = new MongoClient(process.env.MONGODB_CONNECTION_STRING as string);
   const db = mongoClient.db();
-  const userEntity = new MongoEntity(db, {
+  const userEntity = new MongoEntity({
     collectionName: 'users',
     schema: z.object({
       name: z.string(),
@@ -35,9 +37,9 @@ function testMongoEntity() {
   });
 
   const data = userEntity.parse({ name: 'John', age: 20 });
-  userEntity.collection.find({ name: 'John' });
+  userEntity.getCollection(db).find({ name: 'John' });
 
-  const postEntity = new MongoEntity<{ id: string }>(db, {
+  const postEntity = new MongoEntity<{ id: string }>({
     collectionName: 'posts',
   });
 }

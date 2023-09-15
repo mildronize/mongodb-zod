@@ -17,7 +17,7 @@ export class MongoEntities<TEntities extends Record<string, MongoEntity<any>> = 
   ) {
     this.entities = {
       ...this.entities,
-      [collectionName]: new MongoEntity(this.db, {
+      [collectionName]: new MongoEntity({
         collectionName,
         schema: schema ?? ({} as AcceptedParser<TSchema>),
       }),
@@ -44,8 +44,8 @@ function testMongoEntities() {
       })
     );
 
-  const usersCollection = client.entities.users.collection;
-  const postsCollection = client.entities.posts.collection;
+  const usersCollection = client.entities.users.getCollection(db);
+  const postsCollection = client.entities.posts.getCollection(db);
 
   usersCollection.findOne({ id: '1' }).then(user => {
     user?.id;
