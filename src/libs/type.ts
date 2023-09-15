@@ -10,9 +10,9 @@ export type AcceptedParser<T> =
       parse: (input: unknown) => T;
     };
 
-export type InferEntity<T> = T extends TypedMongoEntity<infer U> ? U : never;
+export type InferEntity<T> = T extends TypedMongoBase<infer U> ? U : never;
 
-export type TypedMongoEntity<TSchema extends Record<string, unknown>> = {
+export type TypedMongoBase<TSchema extends Record<string, unknown>> = {
   schema: AcceptedParser<TSchema>;
   collection: Collection<TSchema>;
   parse: (data: unknown) => TSchema;
