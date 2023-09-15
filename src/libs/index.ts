@@ -1,2 +1,2 @@
 export * from './type';
-export * from './typed-mongo-client';
+export * from './mongo-entities';
