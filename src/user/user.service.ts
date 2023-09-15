@@ -1,11 +1,11 @@
-import { MongoClient, Db, ObjectId } from 'mongodb';
+import { MongoClient, Db, ObjectId, DbOptions } from 'mongodb';
 import { UserDTO, UserEntity, userEntitySchema } from './user.model';
 
 export class UserService {
   private readonly db: Db;
 
-  constructor(mongoClient: MongoClient) {
-    this.db = mongoClient.db();
+  constructor(mongoClient: MongoClient, dbName?: string, options?: DbOptions) {
+    this.db = mongoClient.db(dbName, options);
   }
 
   private getUsersCollection() {
