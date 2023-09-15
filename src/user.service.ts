@@ -1,13 +1,17 @@
-import { MongoClient, Db, ObjectId, DbOptions } from 'mongodb';
-import { UserEntity, userEntity } from './user.entity';
+import { Db } from 'mongodb';
+import { UserEntity } from './user.entity';
 import { MongoEntity } from './libs';
 
 export class UserService {
   constructor(public readonly db: Db, protected userEntity: MongoEntity<UserEntity>) {}
 
+  get userCollection(){
+    return this.userEntity.getCollection(this.db);
+  }
+
   async createUser(input: UserEntity) {
     const data = this.userEntity.parse(input);
-    const { insertedId } = await this.userEntity.getCollection(this.db).insertOne(data);
+    const { insertedId } = await this.userCollection.insertOne(data);
     return insertedId;
   }
 }
