@@ -1,43 +1,32 @@
-import { MongoClient, Db, ObjectId, DbOptions } from 'mongodb';
-import { UserDTO, UserEntity, userEntitySchema } from './user.model';
+import { UserEntity } from './user.entity';
+import { MongoEntity } from '../libs';
 
 export class UserService {
-  private readonly db: Db;
+  constructor(protected userEntity: MongoEntity<UserEntity>) {}
 
-  constructor(mongoClient: MongoClient, dbName?: string, options?: DbOptions) {
-    this.db = mongoClient.db(dbName, options);
+  get userCollection() {
+    return this.userEntity.collection;
   }
 
-  private getUsersCollection() {
-    return this.db.collection<UserEntity>('users')
+  async createUser(input: UserEntity) {
+    const data = this.userEntity.parse(input);
+    // const { insertedId } = await this.userCollection.insertOne(data);
+    const { insertedId } = await this.userEntity.create(data);
+    return insertedId.toString();
   }
 
-  async findUser(id: string): Promise<UserDTO | null> {
-    const entity = await this.getUsersCollection().findOne({ _id: new ObjectId(id) });
-    return entity ? UserDTO.convertFromEntity(entity) : null;
+  async findUser(id: string): Promise<UserEntity | null> {
+    // const entity = await this.userCollection.findOne({ _id: new ObjectId(id) });
+    const data = await this.userEntity.findById(id);
+    return data;
   }
 
-  async createUser(dto: Omit<UserDTO, 'id'>): Promise<UserDTO> {
-    const candidate = userEntitySchema.parse({
-      ...dto,
-      _id: new ObjectId(),
-    });
-    const { insertedId } = await this.getUsersCollection().insertOne(candidate);
-    return UserDTO.convertFromEntity({ ...dto, _id: insertedId });
+  async updateUser(id: string, input: Partial<UserEntity>) {
+    const value = await this.userEntity.update(id, input);
+    return value;
   }
 
-  async updateUser(id: string, dto: Omit<Partial<UserDTO>, 'id'>): Promise<UserDTO | null> {
-    const candidate = userEntitySchema.partial().parse(dto);
-
-    const value = await this.getUsersCollection().findOneAndUpdate(
-      { _id: new ObjectId(id) },
-      { $set: candidate },
-      { returnDocument: 'after' }
-    );
-    return value ? UserDTO.convertFromEntity(value) : null;
-  }
-
-  async deleteUser(id: string): Promise<void> {
-    await this.getUsersCollection().deleteOne({ _id: new ObjectId(id) });
+  async deleteUser(id: string) {
+    return await this.userEntity.delete(id);
   }
 }

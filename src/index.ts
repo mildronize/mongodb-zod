@@ -3,7 +3,7 @@ import 'dotenv/config';
 import { Db, MongoClient } from 'mongodb';
 import { ZodError } from 'zod';
 import { fromZodError } from 'zod-validation-error';
-import { UserService } from './user.service';
+import { UserService } from './user/user.service';
 import { userEntity } from './user.entity';
 
 async function prepareMongoCollection(db: Db) {
