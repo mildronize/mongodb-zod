@@ -21,16 +21,22 @@ async function prepareMongoCollection(db: Db) {
 const main = async () => {
   const mongoClient = new MongoClient(process.env.MONGODB_CONNECTION_STRING as string);
   const db = mongoClient.db();
-  await prepareMongoCollection(db);
+  // await prepareMongoCollection(db);
 
-  const userService = new UserService(db, userEntity);
+  const userService = new UserService(userEntity.build(db));
 
   try {
-    const userId = await userService.createUser({ name: 'example', email: 'example@example.com' });
-    console.log({ userId });
+    // const userId = await userService.createUser({ name: 'example', email: 'example@example.com' });
+    // console.log({ userId });
+
+    const userId = '65055b95cc94b1fc8ce9f2bf';
 
     const foundUser = await userService.findUser(userId);
     console.log({ foundUser });
+
+    const updatedUser = await userService.updateUser(userId, { name: 'exampleX' });
+    console.log({ updatedUser });
+
   } catch (err) {
     if (err instanceof ZodError) {
       const validationError = fromZodError(err);

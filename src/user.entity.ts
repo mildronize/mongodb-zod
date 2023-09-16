@@ -6,7 +6,7 @@ export const userEntity = new MongoEntity({
   schema: z.object({
     name: z.string(),
     email: z.string(),
-  }),
+  }).partial(),
 });
 
 export type UserEntity = InferEntity<typeof userEntity>;

@@ -1,4 +1,4 @@
-import { Db, MongoClient } from 'mongodb';
+import { Db, MongoClient, ObjectId, OptionalUnlessRequiredId } from 'mongodb';
 import { z } from 'zod';
 import { getParserFn } from './getParserFn';
 import { Parser } from './parser';
@@ -8,7 +8,18 @@ export interface MongoEntityProp<TSchema extends Record<string, unknown>> {
   readonly schema?: Parser<TSchema> | undefined;
 }
 
+/**
+ * Mongoose-like client for MongoDB
+ * Ref: https://mongoosejs.com/
+ */
+
+class EntityOption {
+  constructor(public skipValidation = false) {}
+}
+
+
 export class MongoEntity<TSchema extends Record<string, unknown> = {}> {
+  protected db!: Db;
   constructor(public prop: MongoEntityProp<TSchema>) {}
 
   public parse(data: unknown): TSchema {
@@ -16,10 +27,34 @@ export class MongoEntity<TSchema extends Record<string, unknown> = {}> {
     return parseFn(data);
   }
 
-  public getCollection(db: Db) {
-    return db.collection<TSchema>(this.prop.collectionName);
+  public findById(id: string) {
+    this.validate();
+    return this.collection.findOne({ _id: new ObjectId(id) as any });
   }
 
+  public create(data: OptionalUnlessRequiredId<TSchema>, option: EntityOption = new EntityOption()) {
+    this.validate(data, option);
+    return this.collection.insertOne(data);
+  }
+
+  public get collection() {
+    return this.db.collection<TSchema>(this.prop.collectionName);
+  }
+
+  public build(db: Db) {
+    this.db = db;
+    return this;
+  }
+
+  public validate(data?: unknown, option?: EntityOption) {
+    if (!this.db) {
+      throw new Error(`MongoEntityClient: You must call "build" method before using this client`);
+    }
+  
+    if (option?.skipValidation === false && data !== undefined) {
+      this.parse(data);
+    }
+  }
 }
 
 /**
@@ -35,10 +70,10 @@ function testMongoEntity() {
       name: z.string(),
       age: z.number(),
     }),
-  });
+  }).build(db);
 
   const data = userEntity.parse({ name: 'John', age: 20 });
-  userEntity.getCollection(db).find({ name: 'John' });
+  userEntity.collection.find({ name: 'John' });
 
   const postEntity = new MongoEntity<{ id: string }>({
     collectionName: 'posts',
