@@ -24,13 +24,14 @@ export class MongoEntities<TEntities extends Record<string, MongoEntity<any>> = 
     };
     return this as MongoEntities<TEntities & Record<TNewEntity, MongoEntity<TSchema>>>;
   }
+
 }
 
 /**
  * Example Usage
  */
 
-function testMongoEntities() {
+export function testMongoEntities() {
   const mongoClient = new MongoClient(process.env.MONGODB_CONNECTION_STRING as string);
   const db = mongoClient.db();
   const client = new MongoEntities(db)
@@ -44,8 +45,8 @@ function testMongoEntities() {
       })
     );
 
-  const usersCollection = client.entities.users.getCollection(db);
-  const postsCollection = client.entities.posts.getCollection(db);
+  const usersCollection = client.entities.users.collection;
+  const postsCollection = client.entities.posts.collection;
 
   usersCollection.findOne({ id: '1' }).then(user => {
     user?.id;

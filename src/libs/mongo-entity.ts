@@ -35,14 +35,14 @@ export class MongoEntity<TSchema extends Record<string, unknown> = {}> {
     return this.db.collection<TSchema>(this.prop.collectionName);
   }
 
-  public build(db: Db) {
+  public connect(db: Db) {
     this.db = db;
     return this;
   }
 
   public validate(data?: unknown, option?: EntityOption) {
     if (!this.db) {
-      throw new Error(`MongoEntityClient: You must call "build" method before using this client`);
+      throw new Error(`MongoEntityClient: You must call "connect" method before using this client`);
     }
 
     if (option?.skipValidation === false && data !== undefined) {
@@ -79,7 +79,7 @@ export class MongoEntity<TSchema extends Record<string, unknown> = {}> {
  * Usage Example
  */
 
-function testMongoEntity() {
+export function testMongoEntity() {
   const mongoClient = new MongoClient(process.env.MONGODB_CONNECTION_STRING as string);
   const db = mongoClient.db();
   const userEntity = new MongoEntity({
@@ -88,7 +88,7 @@ function testMongoEntity() {
       name: z.string(),
       age: z.number(),
     }),
-  }).build(db);
+  }).connect(db);
 
   const data = userEntity.parse({ name: 'John', age: 20 });
   userEntity.collection.find({ name: 'John' });

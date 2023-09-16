@@ -9,14 +9,11 @@ export class UserService {
   }
 
   async createUser(input: UserEntity) {
-    const data = this.userEntity.parse(input);
-    // const { insertedId } = await this.userCollection.insertOne(data);
-    const { insertedId } = await this.userEntity.create(data);
+    const { insertedId } = await this.userEntity.create(input);
     return insertedId.toString();
   }
 
   async findUser(id: string): Promise<UserEntity | null> {
-    // const entity = await this.userCollection.findOne({ _id: new ObjectId(id) });
     const data = await this.userEntity.findById(id);
     return data;
   }
