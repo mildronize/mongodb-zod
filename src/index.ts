@@ -7,16 +7,15 @@ import { UserService } from './user.service';
 import { userEntity } from './user.entity';
 
 async function prepareMongoCollection(db: Db) {
-  // try {
-  //   await db.dropCollection('users');
-  // } catch (e) {
-  //   if (_.get(e, 'codeName') !== 'NamespaceNotFound') {
-  //     throw e;
-  //   }
-  //   console.log(`Collection "users" does not exist, no need to drop`);
-  // }
+  try {
+    await db.dropCollection('users');
+  } catch (e) {
+    if (_.get(e, 'codeName') !== 'NamespaceNotFound') {
+      throw e;
+    }
+    console.log(`Collection "users" does not exist, no need to drop`);
+  }
   // await db.createCollection('users');
-  // db.collection
 }
 
 const main = async () => {
@@ -27,8 +26,11 @@ const main = async () => {
   const userService = new UserService(db, userEntity);
 
   try {
-    const response = await userService.createUser({ name: 'example', email: 'example@example.com' });
-    console.log(response);
+    const userId = await userService.createUser({ name: 'example', email: 'example@example.com' });
+    console.log({ userId });
+
+    const foundUser = await userService.findUser(userId);
+    console.log({ foundUser });
   } catch (err) {
     if (err instanceof ZodError) {
       const validationError = fromZodError(err);
@@ -36,12 +38,11 @@ const main = async () => {
       // you may print it to console
       // or return it via an API
       console.log(validationError.message);
-      process.exit(1)
+      process.exit(1);
     } else {
       throw err;
     }
   }
-
 
   // const userService = new UserService(mongoClient);
 
