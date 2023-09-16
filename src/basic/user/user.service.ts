@@ -1,5 +1,5 @@
 import { UserEntity } from './user.entity';
-import { MongoEntity } from '../libs';
+import { MongoEntity } from '../../libs';
 
 export class UserService {
   constructor(protected userEntity: MongoEntity<UserEntity>) {}

@@ -1,4 +1,4 @@
-import { InferEntity, MongoEntity } from '../libs';
+import { InferEntity, MongoEntity } from '../../libs';
 import { z } from 'zod';
 
 export const userEntity = new MongoEntity({
