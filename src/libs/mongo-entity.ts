@@ -17,7 +17,6 @@ class EntityOption {
   constructor(public skipValidation = false) {}
 }
 
-
 export class MongoEntity<TSchema extends Record<string, unknown> = {}> {
   protected db!: Db;
   constructor(public prop: MongoEntityProp<TSchema>) {}
@@ -27,15 +26,10 @@ export class MongoEntity<TSchema extends Record<string, unknown> = {}> {
     return parseFn(data);
   }
 
-  public findById(id: string) {
-    this.validate();
-    return this.collection.findOne({ _id: new ObjectId(id) as any });
-  }
-
-  public create(data: OptionalUnlessRequiredId<TSchema>, option: EntityOption = new EntityOption()) {
-    this.validate(data, option);
-    return this.collection.insertOne(data);
-  }
+  /**
+   * Get Native MongoDB collection
+   * Manage it by yourself
+   */
 
   public get collection() {
     return this.db.collection<TSchema>(this.prop.collectionName);
@@ -50,10 +44,34 @@ export class MongoEntity<TSchema extends Record<string, unknown> = {}> {
     if (!this.db) {
       throw new Error(`MongoEntityClient: You must call "build" method before using this client`);
     }
-  
+
     if (option?.skipValidation === false && data !== undefined) {
       this.parse(data);
     }
+  }
+
+  public findById(id: string) {
+    this.validate();
+    return this.collection.findOne({ _id: new ObjectId(id) as any });
+  }
+
+  public create(data: OptionalUnlessRequiredId<TSchema>, option: EntityOption = new EntityOption()) {
+    this.validate(data, option);
+    return this.collection.insertOne(data);
+  }
+
+  public update(id: string, data: Partial<TSchema>, option: EntityOption = new EntityOption()) {
+    this.validate(data, option);
+    return this.collection.findOneAndUpdate(
+      { _id: new ObjectId(id) as any },
+      { $set: data },
+      { returnDocument: 'after' }
+    );
+  }
+
+  public delete(id: string) {
+    this.validate();
+    return this.collection.deleteOne({ _id: new ObjectId(id) as any });
   }
 }
 

@@ -26,16 +26,17 @@ const main = async () => {
   const userService = new UserService(userEntity.build(db));
 
   try {
-    // const userId = await userService.createUser({ name: 'example', email: 'example@example.com' });
-    // console.log({ userId });
-
-    const userId = '65055b95cc94b1fc8ce9f2bf';
+    const userId = await userService.createUser({ name: 'example', email: 'example@example.com' });
+    console.log({ userId });
 
     const foundUser = await userService.findUser(userId);
     console.log({ foundUser });
 
     const updatedUser = await userService.updateUser(userId, { name: 'exampleX' });
     console.log({ updatedUser });
+
+    const deletedUser = await userService.deleteUser(userId);
+    console.log({ deletedUser });
 
   } catch (err) {
     if (err instanceof ZodError) {
@@ -50,18 +51,6 @@ const main = async () => {
     }
   }
 
-  // const userService = new UserService(mongoClient);
-
-  // const createdUser = await userService.createUser({ name: 'example', email: 'example@example.com' });
-  // console.log({ createdUser });
-
-  // const updatedUser = await userService.updateUser(createdUser.id, { name: 'exampleX' });
-  // console.log({ updatedUser });
-
-  // const foundUser = await userService.findUser(createdUser.id);
-  // console.log({ foundUser });
-
-  // await userService.deleteUser(createdUser.id);
 };
 
 main()

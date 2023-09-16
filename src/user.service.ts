@@ -23,12 +23,11 @@ export class UserService {
   }
 
   async updateUser(id: string, input: Partial<UserEntity>) {
-    const data = this.userEntity.parse(input);
-    const value = await this.userCollection.findOneAndUpdate(
-      { _id: new ObjectId(id) },
-      { $set: data },
-      { returnDocument: 'after' }
-    );
+    const value = await this.userEntity.update(id, input);
     return value;
+  }
+
+  async deleteUser(id: string) {
+    return await this.userEntity.delete(id);
   }
 }
