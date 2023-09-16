@@ -1,5 +1,5 @@
-import { MongoEntity } from './mongo-entity';
+import { MongoModel } from './mongo-model';
 
 
 
-export type InferEntity<T> = T extends MongoEntity<infer U> ? U : never;
+export type InferModel<T> = T extends MongoModel<infer U> ? U : never;

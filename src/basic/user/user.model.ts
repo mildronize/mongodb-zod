@@ -1,7 +1,7 @@
-import { InferEntity, MongoEntity } from '../../libs';
+import { InferModel, MongoModel } from '../../libs';
 import { z } from 'zod';
 
-export const userEntity = new MongoEntity({
+export const userModel = new MongoModel({
   collectionName: 'users',
   schema: z
     .object({
@@ -12,4 +12,4 @@ export const userEntity = new MongoEntity({
     .strict(),
 });
 
-export type UserEntity = InferEntity<typeof userEntity>;
+export type UserModel = InferModel<typeof userModel>;

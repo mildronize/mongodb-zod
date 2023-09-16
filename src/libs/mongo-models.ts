@@ -1,28 +1,28 @@
 import { MongoClient, Db } from 'mongodb';
 import { z } from 'zod';
-import { MongoEntity } from './mongo-entity';
+import { MongoModel } from './mongo-Model';
 import { Parser } from './parser';
 
 /**
  * TODO: To publish as a package
  */
-export class MongoEntities<TEntities extends Record<string, MongoEntity<any>> = {}> {
-  entities: TEntities = {} as TEntities;
+export class MongoModels<TModels extends Record<string, MongoModel<any>> = {}> {
+  Models: TModels = {} as TModels;
 
   constructor(public readonly db: Db) {}
 
-  add<TNewEntity extends string, TSchema extends Record<string, unknown>>(
-    collectionName: TNewEntity,
+  add<TNewModel extends string, TSchema extends Record<string, unknown>>(
+    collectionName: TNewModel,
     schema?: Parser<TSchema> | undefined
   ) {
-    this.entities = {
-      ...this.entities,
-      [collectionName]: new MongoEntity({
+    this.Models = {
+      ...this.Models,
+      [collectionName]: new MongoModel({
         collectionName,
         schema: schema ?? ({} as Parser<TSchema>),
       }),
     };
-    return this as MongoEntities<TEntities & Record<TNewEntity, MongoEntity<TSchema>>>;
+    return this as MongoModels<TModels & Record<TNewModel, MongoModel<TSchema>>>;
   }
 
 }
@@ -31,10 +31,10 @@ export class MongoEntities<TEntities extends Record<string, MongoEntity<any>> = 
  * Example Usage
  */
 
-export function testMongoEntities() {
+export function testMongoModels() {
   const mongoClient = new MongoClient(process.env.MONGODB_CONNECTION_STRING as string);
   const db = mongoClient.db();
-  const client = new MongoEntities(db)
+  const client = new MongoModels(db)
     // Add user collection
     .add<'users', { id: string }>('users')
     // Add posts collection
@@ -45,12 +45,12 @@ export function testMongoEntities() {
       })
     );
 
-  const usersCollection = client.entities.users.collection;
-  const postsCollection = client.entities.posts.collection;
+  const usersCollection = client.Models.users.collection;
+  const postsCollection = client.Models.posts.collection;
 
   usersCollection.findOne({ id: '1' }).then(user => {
     user?.id;
   });
 
-  const data = client.entities.users.parse({ id: '1' });
+  const data = client.Models.users.parse({ id: '1' });
 }

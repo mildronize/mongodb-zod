@@ -4,7 +4,7 @@ import { Db, MongoClient } from 'mongodb';
 import { ZodError } from 'zod';
 import { fromZodError } from 'zod-validation-error';
 import { UserService } from './user/user.service';
-import { userEntity } from './user/user.entity';
+import { userModel } from './user/user.model';
 
 async function prepareMongoCollection(db: Db) {
   try {
@@ -23,7 +23,7 @@ const main = async () => {
   const db = mongoClient.db();
   // await prepareMongoCollection(db);
 
-  const userService = new UserService(userEntity.connect(db));
+  const userService = new UserService(userModel.connect(db));
 
   try {
     const userId = await userService.createUser({ name: 'example', email: 'example@example.com' });

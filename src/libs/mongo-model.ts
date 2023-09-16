@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { getParserFn } from './getParserFn';
 import { Parser } from './parser';
 
-export interface MongoEntityProp<TSchema extends Record<string, unknown>> {
+export interface MongoModelProp<TSchema extends Record<string, unknown>> {
   readonly collectionName: string;
   readonly schema?: Parser<TSchema> | undefined;
 }
@@ -13,13 +13,13 @@ export interface MongoEntityProp<TSchema extends Record<string, unknown>> {
  * Ref: https://mongoosejs.com/
  */
 
-class EntityOption {
+class ModelOption {
   constructor(public skipValidation = false) {}
 }
 
-export class MongoEntity<TSchema extends Record<string, unknown> = {}> {
+export class MongoModel<TSchema extends Record<string, unknown> = {}> {
   protected db!: Db;
-  constructor(public prop: MongoEntityProp<TSchema>) {}
+  constructor(public prop: MongoModelProp<TSchema>) {}
 
   public parse(data: unknown): TSchema {
     const parseFn = getParserFn(this.prop.schema ?? ({} as Parser<TSchema>));
@@ -40,9 +40,9 @@ export class MongoEntity<TSchema extends Record<string, unknown> = {}> {
     return this;
   }
 
-  public validate(data?: unknown, option?: EntityOption) {
+  public validate(data?: unknown, option?: ModelOption) {
     if (!this.db) {
-      throw new Error(`MongoEntityClient: You must call "connect" method before using this client`);
+      throw new Error(`MongoModelClient: You must call "connect" method before using this client`);
     }
 
     if (option?.skipValidation === false && data !== undefined) {
@@ -55,12 +55,12 @@ export class MongoEntity<TSchema extends Record<string, unknown> = {}> {
     return this.collection.findOne({ _id: new ObjectId(id) as any });
   }
 
-  public create(data: OptionalUnlessRequiredId<TSchema>, option: EntityOption = new EntityOption()) {
+  public create(data: OptionalUnlessRequiredId<TSchema>, option: ModelOption = new ModelOption()) {
     this.validate(data, option);
     return this.collection.insertOne(data);
   }
 
-  public update(id: string, data: Partial<TSchema>, option: EntityOption = new EntityOption()) {
+  public update(id: string, data: Partial<TSchema>, option: ModelOption = new ModelOption()) {
     this.validate(data, option);
     return this.collection.findOneAndUpdate(
       { _id: new ObjectId(id) as any },
@@ -79,10 +79,10 @@ export class MongoEntity<TSchema extends Record<string, unknown> = {}> {
  * Usage Example
  */
 
-export function testMongoEntity() {
+export function testMongoModel() {
   const mongoClient = new MongoClient(process.env.MONGODB_CONNECTION_STRING as string);
   const db = mongoClient.db();
-  const userEntity = new MongoEntity({
+  const userModel = new MongoModel({
     collectionName: 'users',
     schema: z.object({
       name: z.string(),
@@ -90,10 +90,10 @@ export function testMongoEntity() {
     }),
   }).connect(db);
 
-  const data = userEntity.parse({ name: 'John', age: 20 });
-  userEntity.collection.find({ name: 'John' });
+  const data = userModel.parse({ name: 'John', age: 20 });
+  userModel.collection.find({ name: 'John' });
 
-  const postEntity = new MongoEntity<{ id: string }>({
+  const postModel = new MongoModel<{ id: string }>({
     collectionName: 'posts',
   });
 }

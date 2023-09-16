@@ -1,3 +1,3 @@
 export * from './type';
-export * from './mongo-entities';
-export * from './mongo-entity';
+export * from './mongo-Models';
+export * from './mongo-Model';
