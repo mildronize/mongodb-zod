@@ -1,24 +1,25 @@
-import { Collection, Db, MongoClient } from 'mongodb';
-import { AcceptedParser } from './type';
+import { Db, MongoClient } from 'mongodb';
 import { z } from 'zod';
-import { parseSchema } from './utils';
+import { getParserFn } from './getParserFn';
+import { Parser } from './parser';
 
 export interface MongoEntityProp<TSchema extends Record<string, unknown>> {
   readonly collectionName: string;
-  readonly schema?: AcceptedParser<TSchema> | undefined;
+  readonly schema?: Parser<TSchema> | undefined;
 }
 
 export class MongoEntity<TSchema extends Record<string, unknown> = {}> {
-  // public readonly collection: Collection<TSchema>;
   constructor(public prop: MongoEntityProp<TSchema>) {}
 
   public parse(data: unknown): TSchema {
-    return parseSchema(this.prop.schema ?? ({} as AcceptedParser<TSchema>), data);
+    const parseFn = getParserFn(this.prop.schema ?? ({} as Parser<TSchema>));
+    return parseFn(data);
   }
 
   public getCollection(db: Db) {
     return db.collection<TSchema>(this.prop.collectionName);
   }
+
 }
 
 /**

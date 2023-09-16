@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import 'dotenv/config';
 import { Db, MongoClient } from 'mongodb';
+import { ZodError } from 'zod';
+import { fromZodError } from 'zod-validation-error';
 import { UserService } from './user.service';
 import { userEntity } from './user.entity';
 
@@ -13,7 +15,6 @@ async function prepareMongoCollection(db: Db) {
   //   }
   //   console.log(`Collection "users" does not exist, no need to drop`);
   // }
-
   // await db.createCollection('users');
   // db.collection
 }
@@ -25,8 +26,22 @@ const main = async () => {
 
   const userService = new UserService(db, userEntity);
 
-  const response = await userService.createUser({ name: 'example', email: 'example@example.com' });
-  console.log(response);
+  try {
+    const response = await userService.createUser({ name: 'example', email: 'example@example.com' });
+    console.log(response);
+  } catch (err) {
+    if (err instanceof ZodError) {
+      const validationError = fromZodError(err);
+      // the error now is readable by the user
+      // you may print it to console
+      // or return it via an API
+      console.log(validationError.message);
+      process.exit(1)
+    } else {
+      throw err;
+    }
+  }
+
 
   // const userService = new UserService(mongoClient);
 

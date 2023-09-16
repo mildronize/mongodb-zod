@@ -1,7 +1,7 @@
-import { MongoClient, Db, DbOptions } from 'mongodb';
-import { AcceptedParser } from './type';
+import { MongoClient, Db } from 'mongodb';
 import { z } from 'zod';
 import { MongoEntity } from './mongo-entity';
+import { Parser } from './parser';
 
 /**
  * TODO: To publish as a package
@@ -13,13 +13,13 @@ export class MongoEntities<TEntities extends Record<string, MongoEntity<any>> = 
 
   add<TNewEntity extends string, TSchema extends Record<string, unknown>>(
     collectionName: TNewEntity,
-    schema?: AcceptedParser<TSchema> | undefined
+    schema?: Parser<TSchema> | undefined
   ) {
     this.entities = {
       ...this.entities,
       [collectionName]: new MongoEntity({
         collectionName,
-        schema: schema ?? ({} as AcceptedParser<TSchema>),
+        schema: schema ?? ({} as Parser<TSchema>),
       }),
     };
     return this as MongoEntities<TEntities & Record<TNewEntity, MongoEntity<TSchema>>>;
